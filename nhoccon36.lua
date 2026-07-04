@@ -1,13 +1,12 @@
 -- ==========================================
--- 💀 SCRIPT: DUMP GAME (GIẢI PHẪU CĂN CỨ)
+-- 📡 LIỆT KÊ TẤT CẢ CÁC REMOTEEVENT
 -- ==========================================
-local success, result = pcall(function()
-    local dump = saveinstance() -- Lệnh dump toàn bộ game
-    return dump
-end)
+print("--- ĐANG QUÉT CÁC ĐƯỜNG TRUYỀN (REMOTE) ---")
+local replicatedStorage = game:GetService("ReplicatedStorage")
 
-if success then
-    print("✅ Đã dump thành công! Kiểm tra thư mục workspace của Executor.")
-else
-    warn("❌ Executor của bạn không hỗ trợ saveinstance. Lỗi: " .. tostring(result))
+for _, v in pairs(replicatedStorage:GetDescendants()) do
+    if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+        print("🔍 Tìm thấy cổng: " .. v.Name .. " (Đường dẫn: " .. v:GetFullName() .. ")")
+    end
 end
+print("--- QUÉT XONG! Kéo lên xem log ---")
