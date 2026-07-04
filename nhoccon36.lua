@@ -1,24 +1,16 @@
--- ==========================================
--- 📡 SCRIPT: LẮNG NGHE TÍN HIỆU NGẦM
--- ==========================================
-print("🚀 Đang khởi tạo bộ máy nghe lén...")
-
--- Tìm tất cả các sự kiện trong ReplicatedStorage
-for _, v in pairs(game.ReplicatedStorage:GetDescendants()) do
-    -- Chúng ta tìm các sự kiện có chữ "Signal" hoặc "Event"
-    if v:IsA("RemoteEvent") or v:IsA("BindableEvent") then
-        local name = v.Name:lower()
-        if name:match("signal") or name:match("event") then
-            
-            -- Lắng nghe xem nó gửi cái gì mỗi khi game update
-            v.OnClientEvent:Connect(function(...)
-                local args = {...}
-                print("⚡ Phát hiện tín hiệu từ: " .. v.Name)
-                for i, arg in pairs(args) do
-                    print("   -> Dữ liệu gửi tới: ", arg)
+-- Quét các hàm để tìm Upvalue (Dữ liệu ngầm)
+for _, v in pairs(getgc(true)) do
+    if type(v) == "function" and islclosure(v) then
+        local name = debug.getinfo(v).name
+        if name and (name:lower():match("double") or name:lower():match("roll")) then
+            print("🔍 Tìm thấy hàm tiềm năng: " .. name)
+            -- Liệt kê các biến ngầm (Upvalues) của hàm này
+            for i = 1, 100 do
+                local name, val = debug.getupvalue(v, i)
+                if val and type(val) == "table" then
+                    print("   - Upvalue số " .. i .. " (Table): " .. tostring(val))
                 end
-            end)
+            end
         end
     end
 end
-print("✅ Đã bắt đầu nghe lén!")
