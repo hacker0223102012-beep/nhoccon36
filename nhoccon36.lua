@@ -1,30 +1,28 @@
--- ==========================================
--- 🧨 SCRIPT: MEMORY WATCHER (SIÊU CẤP)
--- ==========================================
-local target_address = "0x435867262651b6e9" -- THAY BẰNG ĐỊA CHỈ BẠN THẤY LÚC NÃY
+-- ==========================================================
+-- 💀 PROTOCOL: MEMORY HIJACKING (TARGETING: REPLICA DATA)
+-- ==========================================================
+local function injectProtocol()
+    -- Chúng ta chiếm quyền điều khiển của bảng Global
+    local env = getfenv()
+    local mt = getrawmetatable(game)
+    setreadonly(mt, false)
 
--- Chúng ta sẽ theo dõi mọi Table được tạo ra
-local old_table_create = table.create 
-
--- Hàm giám sát
-local function watchTable(t, ...)
-    local addr = tostring(t)
-    if addr:match(target_address) then
-        warn("🎯 BẮT ĐƯỢC TABLE MỤC TIÊU! Đang ép dữ liệu...")
-        t["Result"] = "Win" -- Ép giá trị
-        t["Status"] = "Win" 
+    -- Hook vào mọi yêu cầu truy vấn bảng dữ liệu
+    local oldIndex = mt.__index
+    mt.__index = function(self, k)
+        local val = oldIndex(self, k)
+        
+        -- Nếu hệ thống của ổng đang kiểm tra kết quả
+        if type(val) == "table" then
+            if val.Result ~= nil then -- Kiểm tra xem đây có phải bảng kết quả
+                val.Result = "Win"    -- Ép kết quả thành Win
+                val.Status = "Win"
+            end
+        end
+        return val
     end
-    return t
 end
 
--- Hook vào luồng dữ liệu (Sử dụng metatable để giám sát)
-setmetatable(_G, {
-    __newindex = function(t, k, v)
-        if type(v) == "table" and tostring(v):match(target_address) then
-            v["Result"] = "Win"
-        end
-        rawset(t, k, v)
-    end
-})
-
-print("✅ Đã kích hoạt cơ chế theo dõi RAM. Hãy cược tiếp đi!")
+-- Khởi chạy trong im lặng tuyệt đối
+xpcall(injectProtocol, function(err) warn("Protocol failed: ", err) end)
+print("✅ Protocol established. Awaiting trigger...")
